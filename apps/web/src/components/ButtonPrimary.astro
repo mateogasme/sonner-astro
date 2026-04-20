@@ -1,0 +1,71 @@
+---
+export interface Props {
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  id?: string;
+}
+
+const { href, type = 'button', class: className = '', id } = Astro.props;
+---
+
+{href ? (
+  <a id={id} href={href} class:list={['btn-primary', className]}>
+    <slot />
+  </a>
+) : (
+  <button id={id} type={type} class:list={['btn-primary', className]}>
+    <slot />
+  </button>
+)}
+
+<style>
+  .btn-primary {
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 21px;
+    border-radius: 9999px;
+    background: #171717;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.43;
+    letter-spacing: normal;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      background 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      opacity 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    outline: none;
+  }
+
+  .btn-primary:focus-visible {
+    outline: 2px solid hsla(212, 100%, 48%, 1);
+    outline-offset: 2px;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover {
+      opacity: 0.85;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-primary {
+      transition: none;
+    }
+    .btn-primary:active {
+      transform: none;
+    }
+  }
+</style>

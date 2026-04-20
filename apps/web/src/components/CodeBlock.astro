@@ -1,0 +1,219 @@
+---
+export interface Props {
+  code: string;
+  label?: string;
+  alwaysShowCopy?: boolean;
+  class?: string;
+}
+
+const { code, label, alwaysShowCopy = false } = Astro.props;
+---
+
+<div class="cb-outer" {...Astro.props}>
+  {label && <span class="cb-label">{label}</span>}
+  <div class="cb-wrapper">
+    <pre class="cb-root"><code>{code}</code></pre>
+    <button
+      class="cb-copy"
+      aria-label="Copy to clipboard"
+      data-copy-btn
+      data-code={code}
+      data-always-visible={alwaysShowCopy ? '' : undefined}
+    >
+      <span class="cb-icon-wrap">
+        <!-- Copy icon -->
+        <svg data-icon="copy" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+        </svg>
+        <!-- Check icon -->
+        <svg data-icon="check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+</div>
+
+<style>
+  .cb-outer {
+    --gray0: #fff;
+    --gray1: hsl(0, 0%, 99%);
+    --gray2: hsl(0, 0%, 97.3%);
+    --gray3: hsl(0, 0%, 95.1%);
+    --gray4: hsl(0, 0%, 93%);
+    --gray12: hsl(0, 0%, 9%);
+    position: relative;
+  }
+
+  .cb-label {
+    display: block;
+    font-family: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: hsl(0, 0%, 56%);
+    margin-bottom: 6px;
+    user-select: none;
+  }
+
+  .cb-wrapper {
+    overflow: hidden;
+    position: relative;
+    border-radius: 6px;
+    border: 1px solid var(--gray3);
+  }
+
+  .cb-root {
+    padding: 16px;
+    margin: 0;
+    background: linear-gradient(to top, var(--gray2), var(--gray1) 16px);
+    border-radius: 0;
+    line-height: 17px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .cb-root code {
+    font-family: 'Geist Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    color: var(--gray12);
+    background: none;
+  }
+
+  .cb-copy {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--gray4);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray0);
+    cursor: pointer;
+    opacity: 0;
+    color: var(--gray12);
+    padding: 0;
+    transition: background 200ms, box-shadow 200ms, opacity 200ms, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .cb-copy:focus-visible {
+    opacity: 1;
+    outline: none;
+    box-shadow: 0 0 0 1px var(--gray4);
+  }
+
+  .cb-copy:active {
+    transform: scale(0.97);
+  }
+
+  .cb-copy[data-always-visible] {
+    opacity: 1;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .cb-wrapper:hover .cb-copy {
+      opacity: 1;
+    }
+
+    .cb-copy:hover {
+      background: var(--gray1);
+    }
+  }
+
+  .cb-icon-wrap {
+    position: relative;
+    width: 13px;
+    height: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cb-icon-wrap svg {
+    position: absolute;
+  }
+
+  /* Check starts hidden — JS drives animation from here */
+  .cb-icon-wrap svg[data-icon='check'] {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+</style>
+
+<script>
+  const DURATION = 150;
+  const EASING = 'ease-out';
+
+  function animateOut(el: Element) {
+    return el.animate(
+      [
+        { opacity: 1, transform: 'scale(1)' },
+        { opacity: 0, transform: 'scale(0.5)' },
+      ],
+      { duration: DURATION, easing: EASING, fill: 'forwards' },
+    ).finished;
+  }
+
+  function animateIn(el: Element) {
+    return el.animate(
+      [
+        { opacity: 0, transform: 'scale(0.5)' },
+        { opacity: 1, transform: 'scale(1)' },
+      ],
+      { duration: DURATION, easing: EASING, fill: 'forwards' },
+    ).finished;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-copy-btn]').forEach((btn) => {
+    const copyIcon = btn.querySelector<SVGElement>('[data-icon="copy"]')!;
+    const checkIcon = btn.querySelector<SVGElement>('[data-icon="check"]')!;
+    let reset: ReturnType<typeof setTimeout> | null = null;
+    let busy = false;
+
+    async function showCheck() {
+      if (busy) return;
+      busy = true;
+      await animateOut(copyIcon);
+      await animateIn(checkIcon);
+      busy = false;
+    }
+
+    async function showCopy() {
+      if (busy) return;
+      busy = true;
+      await animateOut(checkIcon);
+      await animateIn(copyIcon);
+      busy = false;
+    }
+
+    btn.addEventListener('click', async () => {
+      const code = btn.dataset.code ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+
+      if (reset) {
+        clearTimeout(reset);
+        reset = null;
+      }
+
+      await showCheck();
+      reset = setTimeout(() => {
+        showCopy();
+        reset = null;
+      }, 2000);
+    });
+  });
+</script>

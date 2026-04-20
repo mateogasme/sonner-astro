@@ -1,0 +1,43 @@
+---
+import Title from '../components/Title.astro';
+import P from '../components/P.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+---
+
+<section class="mt-14">
+  <Title>Usage</Title>
+  <P>Add the Toaster to your layout.</P>
+  <div class="mt-4">
+    <CodeBlock code={`---
+import Toaster from 'sonner-astro/Toaster.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My App</title>
+  </head>
+  <body>
+    <slot />
+    <Toaster position="bottom-right" />
+  </body>
+</html>`} />
+  </div>
+  <P class="my-6">And call toast() from anywhere.</P>
+  <div class="mt-4">
+    <CodeBlock code={`<button id="save-btn">Save changes</button>
+
+<script>
+  import { toast } from 'sonner-astro';
+
+  document.getElementById('save-btn')!.addEventListener('click', () => {
+    toast.promise(fetch('/api/save', { method: 'POST' }), {
+      loading: 'Saving…',
+      success: 'Changes saved',
+      error: 'Something went wrong',
+    });
+  });
+</script>`} />
+  </div>
+</section>

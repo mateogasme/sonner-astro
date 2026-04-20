@@ -1,0 +1,53 @@
+---
+import Title from '../components/Title.astro';
+import P from '../components/P.astro';
+import ButtonOption from '../components/ButtonOption.astro';
+
+const positions = [
+  { label: 'Top Left',      x: 'left',   y: 'top'    },
+  { label: 'Top Center',    x: 'center', y: 'top'    },
+  { label: 'Top Right',     x: 'right',  y: 'top'    },
+  { label: 'Bottom Left',   x: 'left',   y: 'bottom' },
+  { label: 'Bottom Center', x: 'center', y: 'bottom' },
+  { label: 'Bottom Right',  x: 'right',  y: 'bottom' },
+];
+---
+
+<section class="mt-14 mb-30">
+  <Title>Position</Title>
+  <P>Toasts can appear in any corner or at the center.</P>
+  <div class="mt-4" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:340px">
+    {positions.map(({ label, x, y }) => (
+      <ButtonOption
+        data-pos={`${y}-${x}`}
+        style="justify-content:center;font-size:12px;padding:5px 8px"
+      >
+        {label}
+      </ButtonOption>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { getToastOpts } from '../preview-state';
+
+  const btns = document.querySelectorAll<HTMLElement>('[data-pos]');
+
+  function setActive(btn: HTMLElement) {
+    btns.forEach((b) => {
+      b.style.boxShadow = 'rgb(235, 235, 235) 0px 0px 0px 1px';
+      b.style.background = '#ffffff';
+    });
+    btn.style.boxShadow = 'rgba(0, 0, 0, 0.12) 0px 0px 0px 1px';
+    btn.style.background = '#fafafa';
+  }
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const pos = btn.dataset.pos as any;
+      setActive(btn);
+      toast(`Position: ${pos}`, { position: pos, ...getToastOpts() });
+    });
+  });
+</script>

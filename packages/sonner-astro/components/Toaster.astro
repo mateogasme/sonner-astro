@@ -1,0 +1,29 @@
+---
+import type { ToasterProps } from '../src/types';
+
+export interface Props extends ToasterProps {}
+
+const props = Astro.props as Props;
+const serialized = JSON.stringify(props ?? {});
+---
+
+<section data-sonner-root></section>
+
+<script is:inline define:vars={{ serialized }}>
+  // Ensure single boot
+  if (!window.__sonnerAstroBooted) {
+    window.__sonnerAstroBooted = true;
+    window.__sonnerAstroProps = JSON.parse(serialized);
+  }
+</script>
+
+<script>
+  import { createToaster } from '../src/index';
+  import '../src/styles.css';
+
+  const root = document.querySelector('section[data-sonner-root]') as HTMLElement | null;
+  if (root && !(root as any).__sonnerInstance) {
+    const props = (window as any).__sonnerAstroProps || {};
+    (root as any).__sonnerInstance = createToaster(root, props);
+  }
+</script>

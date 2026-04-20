@@ -1,0 +1,130 @@
+---
+import Title from '../components/Title.astro';
+import P from '../components/P.astro';
+import ButtonOption from '../components/ButtonOption.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+---
+
+<section class="mt-14">
+  <Title>Types</Title>
+  <P>You can render any of these toast types.</P>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <ButtonOption data-type="default">Default</ButtonOption>
+    <ButtonOption data-type="description">Description</ButtonOption>
+    <ButtonOption data-type="success">Success</ButtonOption>
+    <ButtonOption data-type="info">Info</ButtonOption>
+    <ButtonOption data-type="warning">Warning</ButtonOption>
+    <ButtonOption data-type="error">Error</ButtonOption>
+    <ButtonOption data-type="loading">Loading</ButtonOption>
+    <ButtonOption data-type="promise">Promise</ButtonOption>
+  </div>
+  <div class="mt-4">
+    <CodeBlock code="toast('Event has been created')" data-types-preview />
+  </div>
+</section>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { getToastOpts, toOptsCode } from '../preview-state';
+
+  type TypeKey = string;
+
+  // Each entry has:
+  //   code()   — dynamic code string (uses current global opts)
+  //   action() — fires the toast with current global opts merged
+  const TYPES: Record<TypeKey, { code: () => string; action: () => void }> = {
+    default: {
+      code: () => `toast('Event has been created'${toOptsCode()})`,
+      action: () => toast('Event has been created', getToastOpts()),
+    },
+    description: {
+      code: () =>
+        `toast('Event has been created'${toOptsCode({ description: "'Monday, January 3rd at 6:00pm'" })})`,
+      action: () =>
+        toast('Event has been created', {
+          description: 'Monday, January 3rd at 6:00pm',
+          ...getToastOpts(),
+        }),
+    },
+    success: {
+      code: () => `toast.success('Event has been created'${toOptsCode()})`,
+      action: () => toast.success('Event has been created', getToastOpts()),
+    },
+    info: {
+      code: () =>
+        `toast.info('Be at the area 10 minutes before the event time'${toOptsCode()})`,
+      action: () =>
+        toast.info('Be at the area 10 minutes before the event time', getToastOpts()),
+    },
+    warning: {
+      code: () =>
+        `toast.warning('Event start time cannot be earlier than 8am'${toOptsCode()})`,
+      action: () =>
+        toast.warning('Event start time cannot be earlier than 8am', getToastOpts()),
+    },
+    error: {
+      code: () => `toast.error('Event has not been created'${toOptsCode()})`,
+      action: () => toast.error('Event has not been created', getToastOpts()),
+    },
+    loading: {
+      // loading toasts don't meaningfully support richColors/action/cancel — keep code static
+      code: () => "toast.loading('Uploading image...')",
+      action: () => toast.loading('Uploading image...'),
+    },
+    promise: {
+      code: () =>
+        "const promise = new Promise((resolve) =>\n  setTimeout(() => resolve({ name: 'Astro' }), 2000),\n);\n\ntoast.promise(promise, {\n  loading: 'Loading...',\n  success: (data) => `${data.name} toast has been added`,\n  error: 'Error',\n})",
+      action: () => {
+        const promise = new Promise<{ name: string }>((resolve) =>
+          setTimeout(() => resolve({ name: 'Astro' }), 2000),
+        );
+        toast.promise(promise, {
+          loading: 'Loading...',
+          success: (data: { name: string }) => `${data.name} toast has been added`,
+          error: 'Error',
+          ...getToastOpts(),
+        });
+      },
+    },
+  };
+
+  const preview = document.querySelector('[data-types-preview]');
+  const codeEl  = preview?.querySelector('code');
+  const copyBtn = preview?.querySelector<HTMLElement>('[data-copy-btn]');
+  const btns    = document.querySelectorAll<HTMLElement>('[data-type]');
+
+  let currentKey = 'default';
+
+  function setActive(key: string) {
+    btns.forEach((b) => {
+      const active = b.dataset.type === key;
+      b.style.boxShadow = active ? 'rgba(0,0,0,0.2) 0px 0px 0px 1.5px' : 'rgb(235,235,235) 0px 0px 0px 1px';
+      b.style.background = active ? '#f5f5f5' : '#ffffff';
+    });
+  }
+
+  function updatePreview(key: string) {
+    const code = TYPES[key].code();
+    if (codeEl) codeEl.textContent = code;
+    if (copyBtn) copyBtn.dataset.code = code;
+  }
+
+  setActive('default');
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.type!;
+      const entry = TYPES[key];
+      if (!entry) return;
+      currentKey = key;
+      setActive(key);
+      updatePreview(key);
+      entry.action();
+    });
+  });
+
+  // When global options change, refresh the code preview for the current type
+  window.addEventListener('sonner-preview-change', () => {
+    updatePreview(currentKey);
+  });
+</script>
