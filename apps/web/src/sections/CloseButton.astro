@@ -1,0 +1,51 @@
+---
+import ButtonOption from '../components/ButtonOption.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import P from '../components/P.astro';
+import Title from '../components/Title.astro';
+---
+
+<section class="mt-14">
+  <Title>Close Button</Title>
+  <P>Add a close button to let users dismiss toasts manually.</P>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <ButtonOption data-closebtn-toggle="off">Off</ButtonOption>
+    <ButtonOption data-closebtn-toggle="on">On</ButtonOption>
+  </div>
+  <div class="mt-4">
+    <CodeBlock code={`<Toaster />`} data-closebtn-preview />
+  </div>
+</section>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { setFlag, isOn, getToastOpts } from '../preview-state';
+
+  const ACTIVE = { boxShadow: 'rgba(0,0,0,0.2) 0px 0px 0px 1.5px', background: '#f5f5f5' };
+  const IDLE   = { boxShadow: 'rgb(235,235,235) 0px 0px 0px 1px',   background: '#ffffff' };
+
+  const toggleBtns = document.querySelectorAll<HTMLElement>('[data-closebtn-toggle]');
+  const preview    = document.querySelector<any>('[data-closebtn-preview]');
+
+  function syncToggle() {
+    const on = isOn('closeButton');
+    toggleBtns.forEach((b) => Object.assign(b.style, b.dataset.closebtnToggle === (on ? 'on' : 'off') ? ACTIVE : IDLE));
+    preview?.setCode?.(on ? `<Toaster closeButton />` : `<Toaster />`);
+  }
+
+  syncToggle();
+
+  toggleBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = btn.dataset.closebtnToggle === 'on';
+      setFlag('closeButton', next);
+      syncToggle();
+      toast('Event has been created', {
+        description: 'Monday, January 3rd at 6:00pm',
+        ...getToastOpts(),
+      });
+    });
+  });
+
+  window.addEventListener('sonner-preview-change', syncToggle);
+</script>

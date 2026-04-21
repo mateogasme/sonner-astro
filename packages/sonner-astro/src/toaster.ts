@@ -343,13 +343,6 @@ export class SonnerToaster {
     return toast.position || this.opts.position || 'bottom-right';
   }
 
-  private toastsAtPosition(position: Position): ToastT[] {
-    // Default (no custom position) toasts live in the toaster's primary position list only
-    return this.toasts.filter(
-      (t) => (!t.position && position === (this.opts.position || 'bottom-right')) || t.position === position,
-    );
-  }
-
   private heightsAtPosition(position: Position): HeightT[] {
     return this.heights.filter((h) => h.position === position);
   }
@@ -398,7 +391,20 @@ export class SonnerToaster {
     // ResizeObserver for content changes
     if (typeof ResizeObserver !== 'undefined') {
       state.resizeObserver = new ResizeObserver(() => {
-        if (!state.mounted || state.removed) return;
+        if (!state.mounted || state.removed || state.swipeOut || state.swiping) return;
+        // If an explicit inline height is set, the element's rendered height is controlled
+        // by stacking (applyIndexAttrs). The auto/restore trick would set height:auto during
+        // an ongoing CSS transition, cancelling and restarting it on every animation frame —
+        // making the height appear stuck. Skip; content changes for stacking-controlled
+        // toasts are handled by updateToastContent.
+        if (li.style.height !== '') return;
+        // For expanded non-front toasts (style.height='', data-front='false'), the CSS
+        // height transition is in progress (e.g. var(--initial-height) animating 52→76).
+        // Setting height:auto via getBCR cancels the ongoing transition — the element
+        // jumps to the final value. Only the front toast (no CSS height rule → always auto)
+        // is safe to measure via the auto/restore trick. Non-front content changes are
+        // handled by updateToastContent → applyOffsets.
+        if (li.getAttribute('data-front') !== 'true') return;
         const original = li.style.height;
         li.style.height = 'auto';
         const newH = li.getBoundingClientRect().height;
@@ -799,22 +805,21 @@ export class SonnerToaster {
 
         if (s.mounted && !s.removed) {
           if (!isFront) {
-            if (wasFront) {
-              // First time going front → non-front: height is currently `auto` so CSS
-              // has no concrete "from" value for the transition. Bridge the gap by pinning
-              // the current rendered height inline, forcing a reflow so the browser
-              // snapshots that value, then setting the target height.
-              const currentH = li.getBoundingClientRect().height;
-              li.style.height = `${currentH}px`;
-              li.getBoundingClientRect(); // force reflow — establishes the "from" snapshot
+            if (!this.expanded) {
+              if (wasFront) {
+                // First time going front → non-front: height is currently `auto` so CSS
+                // has no concrete "from" value for the transition. Bridge the gap by pinning
+                // the current rendered height inline, forcing a reflow so the browser
+                // snapshots that value, then setting the target height.
+                const currentH = li.getBoundingClientRect().height;
+                li.style.height = `${currentH}px`;
+                li.getBoundingClientRect(); // force reflow — establishes the "from" snapshot
+              }
+              // Pin non-front height when collapsed. In expanded mode, applyExpandedToToasts
+              // manages each toast's own height — overwriting here would cause a visible jump
+              // during the 200ms exit animation of a swiped toast.
+              li.style.height = `${frontHeight}px`;
             }
-            // Always pin non-front height as an inline style, matching React Sonner's
-            // approach of always setting height: heights[0]?.height on non-front toasts.
-            // This ensures every --front-toast-height change has an explicit "from" value
-            // and animates correctly, regardless of prior expand/collapse cycles.
-            // applyExpandedToToasts clears this inline style on expand so the CSS rule
-            // height:var(--initial-height) is not overridden during expanded mode.
-            li.style.height = `${frontHeight}px`;
           } else if (!wasFront) {
             // Becoming front again: the non-front inline height is still set.
             // Transition to this toast's natural height, then clear so auto takes over.
@@ -869,17 +874,6 @@ export class SonnerToaster {
     this.applyIndexAttrs();
   }
 
-  private reorderDOM(position: Position) {
-    const ol = this.lists.get(position);
-    if (!ol) return;
-    const list = this.toastsAtPosition(position);
-    // Append in order of list; DOM order doesn't affect visual (transform positions them) but matters for a11y
-    list.forEach((t) => {
-      const s = this.perToast.get(t.id);
-      if (s) ol.appendChild(s.el);
-    });
-  }
-
   private setExpanded(next: boolean) {
     if (next === this.expanded) return;
     // Avoid expand with <=1 toast
@@ -899,9 +893,15 @@ export class SonnerToaster {
 
       if (!isFront && s.mounted && !s.removed) {
         if (value) {
+          // Refresh --initial-height to this toast's own content height before clearing
+          // the inline height. applyOffsets may have run while this toast was non-front
+          // (s.initialHeight correct) but a stale CSS var from a previous front toast's
+          // height could linger. Rewrite ensures the expanded CSS rule sees the right value.
+          s.el.style.setProperty(
+            '--initial-height',
+            this.opts.expand ? 'auto' : `${s.initialHeight}px`,
+          );
           // Expanding: clear the inline height so CSS height:var(--initial-height) wins.
-          // JS and setAttribute run synchronously so the browser sees only the final state
-          // (no inline + data-expanded=true) — no intermediate flash.
           s.el.style.height = '';
         } else {
           // Collapsing (or not expanding): re-pin inline height to frontHeight.
@@ -997,9 +997,15 @@ export class SonnerToaster {
       this.perToast.delete(toast.id);
     }
     this.toasts = this.toasts.filter((t) => t.id !== toast.id);
-    // If the emptied position has no more toasts, cleanup empty <ol>? Keep it to avoid layout jumps.
     this.applyOffsets();
-    if (this.toasts.length <= 1) this.setExpanded(false);
+    // DOM and toasts list are fully updated here. If expanded during a swipe,
+    // applyIndexAttrs pinned newly-visible toasts to frontHeight — fix them now
+    // against the final stack. Collapse first if only one toast remains.
+    if (this.toasts.length <= 1) {
+      this.setExpanded(false);
+    } else if (this.expanded) {
+      this.applyExpandedToToasts();
+    }
   }
 }
 

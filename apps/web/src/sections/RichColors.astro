@@ -1,0 +1,52 @@
+---
+import ButtonOption from '../components/ButtonOption.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import P from '../components/P.astro';
+import Title from '../components/Title.astro';
+---
+
+<section class="mt-14">
+  <Title>Rich Colors</Title>
+  <P>You can make toast colors more expressive based on the type.</P>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <ButtonOption data-rich-toggle="off">Off</ButtonOption>
+    <ButtonOption data-rich-toggle="on">On</ButtonOption>
+  </div>
+  <div class="mt-4">
+    <CodeBlock code={`<Toaster />`} data-rich-preview />
+  </div>
+</section>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { setFlag, isOn, getToastOpts } from '../preview-state';
+
+  const ACTIVE = { boxShadow: 'rgba(0,0,0,0.2) 0px 0px 0px 1.5px', background: '#f5f5f5' };
+  const IDLE   = { boxShadow: 'rgb(235,235,235) 0px 0px 0px 1px',   background: '#ffffff' };
+
+  const preview    = document.querySelector<any>('[data-rich-preview]');
+  const toggleBtns = document.querySelectorAll<HTMLElement>('[data-rich-toggle]');
+
+  function syncToggle() {
+    const on = isOn('richColors');
+    toggleBtns.forEach((b) => Object.assign(b.style, b.dataset.richToggle === (on ? 'on' : 'off') ? ACTIVE : IDLE));
+    preview?.setCode?.(on ? `<Toaster richColors />` : `<Toaster />`);
+  }
+
+  syncToggle();
+
+  toggleBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = btn.dataset.richToggle === 'on';
+      setFlag('richColors', next);
+      syncToggle();
+      if (next) {
+        toast.success('Event has been created', { ...getToastOpts(), richColors: true });
+      } else {
+        toast.success('Event has been created', getToastOpts());
+      }
+    });
+  });
+
+  window.addEventListener('sonner-preview-change', syncToggle);
+</script>

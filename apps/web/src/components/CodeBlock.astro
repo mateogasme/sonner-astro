@@ -142,9 +142,38 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
     opacity: 0;
     transform: scale(0.5);
   }
+
+  /* Syntax highlight — Atom One Light */
+  :global(.hl-cm) { color: #a0a1a7; font-style: italic; }  /* comment  */
+  :global(.hl-st) { color: #50a14f; }                      /* string   */
+  :global(.hl-kw) { color: #a626a4; }                      /* keyword  */
+  :global(.hl-fn) { color: #4078f2; }                      /* function */
+  :global(.hl-cn) { color: #c18401; }                      /* class    */
+  :global(.hl-bl) { color: #986801; }                      /* boolean  */
+  :global(.hl-nm) { color: #986801; }                      /* number   */
+  :global(.hl-tg) { color: #383a42; }                      /* tag `<`  */
 </style>
 
 <script>
+  import { highlight } from '../utils/highlight';
+
+  // Initial highlight + expose setCode(str) on each .cb-outer for dynamic updates
+  document.querySelectorAll<HTMLElement>('.cb-outer').forEach((outer) => {
+    const codeEl = outer.querySelector<HTMLElement>('code');
+    const copyBtn = outer.querySelector<HTMLElement>('[data-copy-btn]');
+    if (!codeEl) return;
+
+    // Highlight initial server-rendered text
+    const initial = codeEl.textContent ?? '';
+    if (initial) codeEl.innerHTML = highlight(initial);
+
+    // Used by section scripts: outer.setCode(rawCode)
+    (outer as any).setCode = (code: string) => {
+      codeEl.innerHTML = highlight(code);
+      if (copyBtn) copyBtn.dataset.code = code;
+    };
+  });
+
   const DURATION = 150;
   const EASING = 'ease-out';
 

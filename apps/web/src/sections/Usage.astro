@@ -1,42 +1,30 @@
 ---
-import Title from '../components/Title.astro';
-import P from '../components/P.astro';
 import CodeBlock from '../components/CodeBlock.astro';
+import P from '../components/P.astro';
+import Title from '../components/Title.astro';
 ---
 
 <section class="mt-14">
   <Title>Usage</Title>
-  <P>Add the Toaster to your layout.</P>
+  <P>Add the Toaster to your layout and call toast() from anywhere.</P>
   <div class="mt-4">
     <CodeBlock code={`---
 import Toaster from 'sonner-astro/Toaster.astro';
+import { toast } from 'sonner-astro';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>My App</title>
-  </head>
-  <body>
-    <slot />
-    <Toaster position="bottom-right" />
-  </body>
-</html>`} />
-  </div>
-  <P class="my-6">And call toast() from anywhere.</P>
-  <div class="mt-4">
-    <CodeBlock code={`<button id="save-btn">Save changes</button>
+<!-- Layout.astro -->
+<body>
+  <slot />
+  <Toaster />
+</body>
+
+<!-- Any page or component -->
+<button id="btn">Give me a toast</button>
 
 <script>
-  import { toast } from 'sonner-astro';
-
-  document.getElementById('save-btn')!.addEventListener('click', () => {
-    toast.promise(fetch('/api/save', { method: 'POST' }), {
-      loading: 'Saving…',
-      success: 'Changes saved',
-      error: 'Something went wrong',
-    });
+  document.getElementById('btn').addEventListener('click', () => {
+    toast('My first toast');
   });
 </script>`} />
   </div>
