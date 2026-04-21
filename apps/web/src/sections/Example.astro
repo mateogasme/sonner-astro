@@ -1,0 +1,123 @@
+---
+import Title from '../components/Title.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+---
+
+<section class="mt-14">
+  <Title>Example</Title>
+  <div class="mt-4 example-card">
+    <div style="display:flex;gap:8px">
+      <input
+        id="example-email"
+        type="text"
+        placeholder="What do you think about sonner-astro?"
+        class="example-input"
+      />
+      <button
+        id="example-subscribe-btn"
+        class="example-btn"
+      >Send message</button>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <CodeBlock code={`toast.promise(subscribe(email), {
+  loading: 'Subscribing...',
+  success: "You're on the list!",
+  error: 'Something went wrong.',
+});`} />
+  </div>
+</section>
+
+<style>
+  .example-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--bg);
+  }
+
+  .example-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--fg);
+    outline: none;
+    background: var(--bg);
+    transition: border-color 150ms;
+    min-width: 0;
+  }
+
+  .example-input::placeholder {
+    color: var(--fg-muted);
+    opacity: 0.7;
+  }
+
+  .example-input:hover:not(:focus) {
+    border-color: var(--border-hover);
+  }
+
+  .example-input:focus {
+    border-color: hsl(212, 100%, 48%);
+  }
+
+  .example-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-fg);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    outline: none;
+    transition: opacity 150ms, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .example-btn:hover {
+    opacity: 0.85;
+  }
+
+  .example-btn:active {
+    transform: scale(0.96);
+  }
+
+  .example-btn:focus-visible {
+    outline: 2px solid hsla(212, 100%, 48%, 1);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .example-btn { transition: opacity 150ms; }
+  }
+</style>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { getToastOpts } from '../preview-state';
+
+  const input = document.getElementById('example-email') as HTMLInputElement;
+  const btn   = document.getElementById('example-subscribe-btn') as HTMLButtonElement;
+
+  btn?.addEventListener('click', () => {
+    const email = input?.value.trim();
+    if (!email) {
+      toast.error('Please enter a message.', getToastOpts());
+      return;
+    }
+    const subscribe = () => new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    toast.promise(subscribe(), {
+      loading: 'Sending...',
+      success: "Your message was sended!",
+      error: 'Something went wrong.',
+      ...getToastOpts(),
+    });
+    input.value = '';
+  });
+</script>

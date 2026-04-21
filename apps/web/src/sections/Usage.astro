@@ -20,11 +20,13 @@ import { toast } from 'sonner-astro';
 </body>
 
 <!-- Any page or component -->
-<button id="btn">Give me a toast</button>
+<button id="btn">Render a toast</button>
 
 <script>
   document.getElementById('btn').addEventListener('click', () => {
-    toast('My first toast');
+    toast('sonner-astro', {
+      description: 'An opinionated toast component for Astro.'
+    });
   });
 </script>`} />
   </div>

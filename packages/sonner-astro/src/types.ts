@@ -65,6 +65,8 @@ export interface ToastT {
   icon?: string | HTMLElement;
   jsx?: HTMLElement | ((id: number | string) => HTMLElement);
   richColors?: boolean;
+  richBackground?: boolean;
+  iconColors?: boolean;
   invert?: boolean;
   closeButton?: boolean;
   dismissible?: boolean;
@@ -156,6 +158,8 @@ export interface ToasterProps {
   position?: Position;
   hotkey?: string[];
   richColors?: boolean;
+  richBackground?: boolean;
+  iconColors?: boolean;
   expand?: boolean;
   duration?: number;
   gap?: number;

@@ -14,7 +14,7 @@ import {
 const VISIBLE_TOASTS_AMOUNT = 3;
 const VIEWPORT_OFFSET = '24px';
 const MOBILE_VIEWPORT_OFFSET = '16px';
-const TOAST_LIFETIME = 4000;
+const TOAST_LIFETIME = 5000;
 const TOAST_WIDTH = 356;
 const GAP = 14;
 const SWIPE_THRESHOLD = 45;
@@ -459,6 +459,8 @@ export class SonnerToaster {
     const dismissible = toast.dismissible !== false;
     const invert = toast.invert || this.opts.invert;
     const defaultRichColors = this.opts.richColors;
+    const defaultRichBackground = this.opts.richBackground;
+    const defaultIconColors = this.opts.iconColors;
     const closeButton = toast.closeButton ?? (this.opts.toastOptions?.closeButton ?? this.opts.closeButton);
     const icons = this.opts.icons;
     const toastOptions = this.opts.toastOptions;
@@ -480,6 +482,8 @@ export class SonnerToaster {
     // data attrs
     li.setAttribute('data-styled', String(!isUnstyled));
     li.setAttribute('data-rich-colors', String(toast.richColors ?? defaultRichColors ?? false));
+    li.setAttribute('data-rich-bg', String(toast.richBackground ?? defaultRichBackground ?? false));
+    li.setAttribute('data-icon-colors', String(toast.iconColors ?? defaultIconColors ?? false));
     li.setAttribute('data-promise', String(Boolean(toast.promise)));
     li.setAttribute('data-dismissible', String(dismissible));
     if (toastType) li.setAttribute('data-type', toastType);

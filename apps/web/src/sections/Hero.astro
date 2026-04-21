@@ -5,9 +5,9 @@ import ButtonSecondary from '../components/ButtonSecondary.astro';
 
 <section class="my-30 text-center">
   <h1 class="text-5xl font-semibold tracking-[-0.02em]">sonner-astro</h1>
-  <p class="text-lg font-normal text-gray-700 text-balance mt-4 leading-tight">
-    An opinionated toast component for <span class="text-green-700">Astro</span>
-    <span class="text-red-700 line-through">React</span>. <br> Ported from
+  <p class="text-lg font-normal text-balance mt-4 leading-tight" style="color: var(--fg-muted)">
+    An opinionated toast component for <span class="text-green-700 dark:text-green-400">Astro</span>
+    <span class="text-red-700 dark:text-red-400 line-through">React</span>. <br> Ported from
     <a href="https://github.com/emilkowalski/sonner" target="_blank" rel="noopener noreferrer" class="underline">emilkowalski/sonner</a>
   </p>
 
@@ -20,8 +20,10 @@ import ButtonSecondary from '../components/ButtonSecondary.astro';
     href="https://github.com/mateogasme/sonner-astro/issues"
     target="_blank"
     rel="noopener noreferrer"
-    class="block mt-4 text-[13px] text-gray-500 hover:text-gray-600"
-    style="transition: color 200ms cubic-bezier(0.23, 1, 0.32, 1)"
+    class="block mt-4 text-[13px]"
+    style="color: var(--fg-muted); transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1)"
+    onmouseover="this.style.opacity='0.7'"
+    onmouseout="this.style.opacity='1'"
   >
     Found a bug? Open an issue
   </a>

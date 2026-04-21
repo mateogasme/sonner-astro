@@ -1,0 +1,99 @@
+---
+import ButtonOption from '../components/ButtonOption.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import P from '../components/P.astro';
+import Title from '../components/Title.astro';
+---
+
+<section class="mt-14">
+  <Title>Theme</Title>
+  <P>Control the color theme of the page and toasts.</P>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <ButtonOption data-theme-btn="light">Light</ButtonOption>
+    <ButtonOption data-theme-btn="dark">Dark</ButtonOption>
+    <ButtonOption data-theme-btn="system">System</ButtonOption>
+  </div>
+  <div class="mt-4">
+    <CodeBlock code={`<Toaster />`} data-theme-preview />
+  </div>
+</section>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { getToastOpts } from '../preview-state';
+
+  const btns    = document.querySelectorAll<HTMLElement>('[data-theme-btn]');
+  const preview = document.querySelector<any>('[data-theme-preview]');
+  const DURATION = 150;
+
+  let currentTheme = 'light';
+
+  const CODE: Record<string, string> = {
+    light:  '<Toaster />',
+    dark:   '<Toaster theme="dark" />',
+    system: '<Toaster theme="system" />',
+  };
+
+  function resolveTheme(theme: string): 'light' | 'dark' {
+    if (theme === 'system') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return theme as 'light' | 'dark';
+  }
+
+  function applyPageTheme(resolved: 'light' | 'dark') {
+    if (resolved === 'dark') {
+      document.documentElement.dataset.theme = 'dark';
+    } else {
+      delete document.documentElement.dataset.theme;
+    }
+  }
+
+  function applyToasterTheme(resolved: 'light' | 'dark') {
+    const root = document.querySelector<any>('section[data-sonner-root]');
+    const inst = root?.__sonnerInstance as any;
+    if (!inst) return;
+    inst.opts.theme = resolved;
+    inst.actualTheme = resolved;
+    inst.lists?.forEach((ol: HTMLElement) => ol.setAttribute('data-sonner-theme', resolved));
+  }
+
+  function syncButtons() {
+    btns.forEach((b) => { b.dataset.active = String(b.dataset.themeBtn === currentTheme); });
+  }
+
+  // Restore saved theme on load — no animation
+  const saved = localStorage.getItem('sonner-theme') ?? 'light';
+  if (saved !== 'light') {
+    currentTheme = saved;
+    const resolvedSaved = resolveTheme(saved);
+    applyPageTheme(resolvedSaved);
+    preview?.setCode?.(CODE[saved]);
+    requestAnimationFrame(() => applyToasterTheme(resolvedSaved));
+  }
+  syncButtons();
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      currentTheme = btn.dataset.themeBtn!;
+      const resolved = resolveTheme(currentTheme);
+
+      localStorage.setItem('sonner-theme', currentTheme);
+
+      // 1. Override all transitions to uniform DURATION
+      document.documentElement.classList.add('theme-switching');
+
+      // 2. Apply theme — every element transitions together at DURATION ms
+      applyPageTheme(resolved);
+      applyToasterTheme(resolved);
+      syncButtons();
+
+      // 3. After transition completes, restore normal per-element transitions
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-switching');
+        preview?.setCode?.(CODE[currentTheme]);
+        toast.success('Theme updated', getToastOpts());
+      }, DURATION);
+    });
+  });
+</script>

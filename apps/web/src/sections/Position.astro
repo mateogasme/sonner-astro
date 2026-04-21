@@ -34,11 +34,8 @@ const positions = [
   const btns = document.querySelectorAll<HTMLElement>('[data-pos]');
   const preview = document.querySelector<any>('[data-position-preview]');
 
-  const ACTIVE = { boxShadow: 'rgba(0,0,0,0.2) 0px 0px 0px 1.5px', background: '#f5f5f5' };
-  const IDLE   = { boxShadow: 'rgb(235,235,235) 0px 0px 0px 1px',   background: '#ffffff' };
-
   function setActive(pos: string) {
-    btns.forEach((b) => Object.assign(b.style, b.dataset.pos === pos ? ACTIVE : IDLE));
+    btns.forEach((b) => { b.dataset.active = String(b.dataset.pos === pos); });
   }
 
   function updatePreview(pos: string) {

@@ -37,12 +37,12 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
 
 <style>
   .cb-outer {
-    --gray0: #fff;
-    --gray1: hsl(0, 0%, 99%);
-    --gray2: hsl(0, 0%, 97.3%);
-    --gray3: hsl(0, 0%, 95.1%);
-    --gray4: hsl(0, 0%, 93%);
-    --gray12: hsl(0, 0%, 9%);
+    --gray0: var(--cb-gray0);
+    --gray1: var(--cb-gray1);
+    --gray2: var(--cb-gray2);
+    --gray3: var(--cb-gray3);
+    --gray4: var(--cb-gray4);
+    --gray12: var(--cb-gray12);
     position: relative;
   }
 
@@ -66,7 +66,7 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
   .cb-root {
     padding: 16px;
     margin: 0;
-    background: linear-gradient(to top, var(--gray2), var(--gray1) 16px);
+    background-color: var(--gray1);
     border-radius: 0;
     line-height: 17px;
     white-space: pre-wrap;
@@ -143,15 +143,15 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
     transform: scale(0.5);
   }
 
-  /* Syntax highlight — Atom One Light */
-  :global(.hl-cm) { color: #a0a1a7; font-style: italic; }  /* comment  */
-  :global(.hl-st) { color: #50a14f; }                      /* string   */
-  :global(.hl-kw) { color: #a626a4; }                      /* keyword  */
-  :global(.hl-fn) { color: #4078f2; }                      /* function */
-  :global(.hl-cn) { color: #c18401; }                      /* class    */
-  :global(.hl-bl) { color: #986801; }                      /* boolean  */
-  :global(.hl-nm) { color: #986801; }                      /* number   */
-  :global(.hl-tg) { color: #383a42; }                      /* tag `<`  */
+  /* Syntax highlight — theme-aware */
+  :global(.hl-cm) { color: var(--hl-cm); font-style: italic; }
+  :global(.hl-st) { color: var(--hl-st); }
+  :global(.hl-kw) { color: var(--hl-kw); }
+  :global(.hl-fn) { color: var(--hl-fn); }
+  :global(.hl-cn) { color: var(--hl-cn); }
+  :global(.hl-bl) { color: var(--hl-cn); }
+  :global(.hl-nm) { color: var(--hl-cn); }
+  :global(.hl-tg) { color: var(--hl-tg); }
 </style>
 
 <script>
