@@ -1,5 +1,5 @@
 {
-  "name": "sonner-astro-monorepo",
+  "name": "sonner-astro",
   "private": true,
   "workspaces": [
     "packages/*",
