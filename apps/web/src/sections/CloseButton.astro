@@ -13,7 +13,7 @@ import Title from '../components/Title.astro';
     <ButtonOption data-closebtn-toggle="on">On</ButtonOption>
   </div>
   <div class="mt-4">
-    <CodeBlock code={`<Toaster />`} data-closebtn-preview />
+    <CodeBlock code={`<Toaster /> // default`} data-closebtn-preview />
   </div>
 </section>
 
@@ -27,7 +27,7 @@ import Title from '../components/Title.astro';
   function syncToggle() {
     const on = isOn('closeButton');
     toggleBtns.forEach((b) => { b.dataset.active = String(b.dataset.closebtnToggle === (on ? 'on' : 'off')); });
-    preview?.setCode?.(on ? `<Toaster closeButton />` : `<Toaster />`);
+    preview?.setCode?.(on ? `<Toaster closeButton />` : `<Toaster /> // default`);
   }
 
   syncToggle();

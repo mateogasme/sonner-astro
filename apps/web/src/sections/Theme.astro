@@ -14,7 +14,7 @@ import Title from '../components/Title.astro';
     <ButtonOption data-theme-btn="system">System</ButtonOption>
   </div>
   <div class="mt-4">
-    <CodeBlock code={`<Toaster />`} data-theme-preview />
+    <CodeBlock code={`<Toaster /> // default`} data-theme-preview />
   </div>
 </section>
 
@@ -29,7 +29,7 @@ import Title from '../components/Title.astro';
   let currentTheme = 'light';
 
   const CODE: Record<string, string> = {
-    light:  '<Toaster />',
+    light:  '<Toaster /> // default',
     dark:   '<Toaster theme="dark" />',
     system: '<Toaster theme="system" />',
   };

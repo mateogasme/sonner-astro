@@ -31,7 +31,11 @@ import Title from '../components/Title.astro';
   }
 
   function updatePreview(val: string) {
-    preview?.setCode?.(`<Toaster duration={${val}} />`);
+    if (val === '5000') {
+      preview?.setCode?.(`<Toaster duration={5000} /> // default`);
+    } else {
+      preview?.setCode?.(`<Toaster duration={${val}} />`);
+    }
   }
 
   const initialVal = getDuration() === Infinity ? 'Infinity' : String(getDuration());

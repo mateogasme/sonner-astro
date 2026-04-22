@@ -23,7 +23,7 @@ const positions = [
     ))}
   </div>
   <div class="mt-4">
-    <CodeBlock code='<Toaster position="bottom-right" />' data-position-preview />
+    <CodeBlock code='<Toaster position="bottom-right" /> // default' data-position-preview />
   </div>
 </section>
 
@@ -39,7 +39,11 @@ const positions = [
   }
 
   function updatePreview(pos: string) {
-    preview?.setCode?.(`<Toaster position="${pos}" />`);
+    if (pos === 'bottom-right') {
+      preview?.setCode?.(`<Toaster position="${pos}" /> // default`);
+    } else {
+      preview?.setCode?.(`<Toaster position="${pos}" />`);
+    }
   }
 
   setActive('bottom-right');

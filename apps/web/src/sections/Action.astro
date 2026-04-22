@@ -1,0 +1,63 @@
+---
+import ButtonOption from '../components/ButtonOption.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import P from '../components/P.astro';
+import Title from '../components/Title.astro';
+---
+
+<section class="mt-14">
+  <Title>Action</Title>
+  <P>Add action and cancel buttons to any toast.</P>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <ButtonOption data-action-btn="action">Action</ButtonOption>
+    <ButtonOption data-action-btn="cancel">Cancel</ButtonOption>
+  </div>
+  <div class="mt-4">
+    <CodeBlock code={`toast('Event has been created')`} data-action-preview />
+  </div>
+</section>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { getToastOpts } from '../preview-state';
+
+  const btns    = document.querySelectorAll<HTMLElement>('[data-action-btn]');
+  const preview = document.querySelector<any>('[data-action-preview]');
+
+  let showAction = false;
+  let showCancel = false;
+
+  function buildCode(): string {
+    if (!showAction && !showCancel) return `toast('Event has been created')`;
+    const opts: string[] = [];
+    if (showAction) opts.push(`  action: {\n    label: 'Undo',\n    onClick: () => {},\n  },`);
+    if (showCancel) opts.push(`  cancel: {\n    label: 'Dismiss',\n    onClick: () => {},\n  },`);
+    return `toast('Event has been created', {\n${opts.join('\n')}\n})`;
+  }
+
+  function sync() {
+    btns.forEach((b) => {
+      const key = b.dataset.actionBtn;
+      b.dataset.active = String(key === 'action' ? showAction : showCancel);
+    });
+    preview?.setCode?.(buildCode());
+  }
+
+  function fireToast() {
+    const opts: Record<string, any> = { ...getToastOpts() };
+    if (showAction) opts.action = { label: 'Undo', onClick: () => {} };
+    if (showCancel) opts.cancel = { label: 'Dismiss', onClick: () => {} };
+    toast('Event has been created', opts);
+  }
+
+  sync();
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.actionBtn === 'action') showAction = !showAction;
+      else showCancel = !showCancel;
+      sync();
+      fireToast();
+    });
+  });
+</script>

@@ -169,8 +169,10 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
 
     // Used by section scripts: outer.setCode(rawCode)
     (outer as any).setCode = (code: string) => {
+      codeEl.style.transition = 'none';
       codeEl.innerHTML = highlight(code);
       if (copyBtn) copyBtn.dataset.code = code;
+      requestAnimationFrame(() => { codeEl.style.transition = ''; });
     };
   });
 

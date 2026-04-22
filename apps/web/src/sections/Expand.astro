@@ -13,7 +13,7 @@ import Title from '../components/Title.astro';
     <ButtonOption data-expand="false">Default</ButtonOption>
   </div>
   <div class="mt-4">
-    <CodeBlock code="<Toaster expand={false} />" data-expand-preview />
+    <CodeBlock code="<Toaster expand={false} /> // default" data-expand-preview />
   </div>
 </section>
 
@@ -29,7 +29,11 @@ import Title from '../components/Title.astro';
   }
 
   function updatePreview(expand: boolean) {
-    preview?.setCode?.(`<Toaster expand={${expand}} />`);
+    if (expand) {
+      preview?.setCode?.(`<Toaster expand={true} />`);
+    } else {
+      preview?.setCode?.(`<Toaster expand={false} /> // default`);
+    }
   }
 
   function applyExpandToToaster(expand: boolean) {

@@ -13,21 +13,32 @@ import ButtonSecondary from '../components/ButtonSecondary.astro';
 
   <div class="flex gap-4 justify-center mt-8">
     <ButtonPrimary id="hero-toast-btn">Render a toast</ButtonPrimary>
-    <ButtonSecondary>GitHub</ButtonSecondary>
+    <ButtonSecondary href="https://github.com/mateogasme/sonner-astro" target="_blank" rel="noopener noreferrer">GitHub</ButtonSecondary>
   </div>
 
   <a
     href="https://github.com/mateogasme/sonner-astro/issues"
     target="_blank"
     rel="noopener noreferrer"
-    class="block mt-4 text-[13px]"
-    style="color: var(--fg-muted); transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1)"
-    onmouseover="this.style.opacity='0.7'"
-    onmouseout="this.style.opacity='1'"
+    class="hero-issue-link block mt-4 text-[13px]"
   >
     Found a bug? Open an issue
   </a>
 </section>
+
+<style>
+  .hero-issue-link {
+    color: var(--fg-muted);
+    opacity: 1;
+    transition: opacity 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero-issue-link:hover {
+      opacity: 0.6;
+    }
+  }
+</style>
 
 <script>
   import { toast } from 'sonner-astro';

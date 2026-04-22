@@ -1,15 +1,17 @@
 ---
 export interface Props {
   href?: string;
+  target?: string;
+  rel?: string;
   type?: 'button' | 'submit' | 'reset';
   class?: string;
 }
 
-const { href, type = 'button', class: className = '' } = Astro.props;
+const { href, target, rel, type = 'button', class: className = '' } = Astro.props;
 ---
 
 {href ? (
-  <a href={href} class:list={['btn-secondary', className]}>
+  <a href={href} target={target} rel={rel} class:list={['btn-secondary', className]}>
     <slot />
   </a>
 ) : (

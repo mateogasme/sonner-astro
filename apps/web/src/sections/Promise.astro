@@ -1,0 +1,47 @@
+---
+import ButtonOption from '../components/ButtonOption.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import P from '../components/P.astro';
+import Title from '../components/Title.astro';
+---
+
+<section class="mt-14">
+  <Title>Promise</Title>
+  <P>Show a loading state that resolves to success or rejects to an error.</P>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <ButtonOption data-promise-btn="resolve">Resolve</ButtonOption>
+    <ButtonOption data-promise-btn="reject">Reject</ButtonOption>
+  </div>
+  <div class="mt-4">
+    <CodeBlock code={`toast.promise(promise, {
+  loading: 'Loading...',
+  success: 'Done!',
+  error: 'Something went wrong.',
+})`} />
+  </div>
+</section>
+
+<script>
+  import { toast } from 'sonner-astro';
+  import { getToastOpts } from '../preview-state';
+
+  document.querySelector('[data-promise-btn="resolve"]')?.addEventListener('click', () => {
+    const p = new Promise<string>((resolve) => setTimeout(() => resolve('Done!'), 1500));
+    toast.promise(p, {
+      loading: 'Loading...',
+      success: 'Done!',
+      error: 'Something went wrong.',
+      ...getToastOpts(),
+    });
+  });
+
+  document.querySelector('[data-promise-btn="reject"]')?.addEventListener('click', () => {
+    const p = new Promise<string>((_, reject) => setTimeout(() => reject(), 1500));
+    toast.promise(p, {
+      loading: 'Loading...',
+      success: 'Done!',
+      error: 'Something went wrong.',
+      ...getToastOpts(),
+    });
+  });
+</script>
