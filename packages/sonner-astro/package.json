@@ -1,11 +1,37 @@
 {
   "name": "sonner-astro",
   "version": "0.1.0",
+  "description": "An opinionated toast component for Astro.",
   "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "astro",
+    "toast",
+    "notifications",
+    "ui",
+    "sonner"
+  ],
+  "homepage": "https://github.com/mateogasme/sonner-astro#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mateogasme/sonner-astro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mateogasme/sonner-astro/issues"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./Toaster.astro": "./components/Toaster.astro",
     "./styles.css": "./src/styles.css"
+  },
+  "files": [
+    "components",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "astro": "^6.0.0"
   },
   "scripts": {
     "check": "astro check"
