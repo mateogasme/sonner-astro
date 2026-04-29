@@ -11,5 +11,7 @@ export type {
   Position,
   SwipeDirection,
   Theme,
+  ToastOptions,
+  Offset,
 } from './types';
 import './styles.css';

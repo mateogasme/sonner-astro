@@ -127,7 +127,7 @@ export type ExternalToast = Omit<ToastT, 'id' | 'type' | 'title' | 'jsx' | 'dele
   toasterId?: string;
 };
 
-interface ToastOptions {
+export interface ToastOptions {
   className?: string;
   closeButton?: boolean;
   descriptionClassName?: string;
@@ -141,7 +141,7 @@ interface ToastOptions {
   toasterId?: string;
 }
 
-type Offset =
+export type Offset =
   | {
       top?: string | number;
       right?: string | number;

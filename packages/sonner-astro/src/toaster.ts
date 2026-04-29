@@ -14,7 +14,7 @@ import {
 const VISIBLE_TOASTS_AMOUNT = 3;
 const VIEWPORT_OFFSET = '24px';
 const MOBILE_VIEWPORT_OFFSET = '16px';
-const TOAST_LIFETIME = 5000;
+const TOAST_LIFETIME = 4000;
 const TOAST_WIDTH = 356;
 const GAP = 14;
 const SWIPE_THRESHOLD = 45;
@@ -137,6 +137,8 @@ export class SonnerToaster {
   private keyHandler: ((e: KeyboardEvent) => void) | null = null;
   private mqlHandler: ((e: MediaQueryListEvent) => void) | null = null;
   private mql: MediaQueryList | null = null;
+  private dirObserver: MutationObserver | null = null;
+  private destroyed = false;
 
   constructor(options: InitOptions) {
     const {
@@ -215,9 +217,18 @@ export class SonnerToaster {
         (this.mql as any).addListener(this.mqlHandler);
       }
     }
+
+    if (typeof MutationObserver !== 'undefined') {
+      this.dirObserver = new MutationObserver(() => {
+        const dir = getDocumentDirection();
+        this.lists.forEach((ol) => ol.setAttribute('dir', dir));
+      });
+      this.dirObserver.observe(document.documentElement, { attributeFilter: ['dir'] });
+    }
   }
 
   destroy() {
+    this.destroyed = true;
     this.unsubscribe?.();
     if (this.visibilityHandler) document.removeEventListener('visibilitychange', this.visibilityHandler);
     if (this.keyHandler) document.removeEventListener('keydown', this.keyHandler);
@@ -228,6 +239,7 @@ export class SonnerToaster {
         (this.mql as any).removeListener(this.mqlHandler);
       }
     }
+    this.dirObserver?.disconnect();
     this.perToast.forEach((s) => {
       s.resizeObserver?.disconnect();
       if (s.timeoutId) clearTimeout(s.timeoutId);
@@ -236,16 +248,51 @@ export class SonnerToaster {
     this.rootEl.innerHTML = '';
   }
 
+  setTheme(theme: 'light' | 'dark' | 'system') {
+    this.opts.theme = theme;
+    const actualTheme =
+      theme !== 'system'
+        ? theme
+        : typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+    this.actualTheme = actualTheme;
+    this.lists.forEach((ol) => ol.setAttribute('data-sonner-theme', actualTheme));
+
+    if (this.mql && this.mqlHandler) {
+      try {
+        this.mql.removeEventListener('change', this.mqlHandler);
+      } catch {
+        (this.mql as any).removeListener(this.mqlHandler);
+      }
+      this.mql = null;
+      this.mqlHandler = null;
+    }
+    if (theme === 'system' && typeof window !== 'undefined' && window.matchMedia) {
+      this.mql = window.matchMedia('(prefers-color-scheme: dark)');
+      this.mqlHandler = (e) => {
+        this.actualTheme = e.matches ? 'dark' : 'light';
+        this.lists.forEach((ol) => ol.setAttribute('data-sonner-theme', this.actualTheme));
+      };
+      try {
+        this.mql.addEventListener('change', this.mqlHandler);
+      } catch {
+        (this.mql as any).addListener(this.mqlHandler);
+      }
+    }
+  }
+
   private handleIncoming(data: ToastT | ToastToDismiss) {
     if ((data as ToastToDismiss).dismiss) {
-      requestAnimationFrame(() => {
+      setTimeout(() => {
+        if (this.destroyed) return;
         const toast = this.toasts.find((t) => t.id === data.id);
         if (toast) {
           toast.delete = true;
           toast.onDismiss?.(toast);
           this.deleteToast(toast);
         }
-      });
+      }, 0);
       return;
     }
 
@@ -259,10 +306,21 @@ export class SonnerToaster {
     }
 
     setTimeout(() => {
+      if (this.destroyed) return;
       const idx = this.toasts.findIndex((x) => x.id === t.id);
       if (idx !== -1) {
         // Update existing
-        this.toasts[idx] = { ...this.toasts[idx], ...t };
+        const old = this.toasts[idx];
+        // Re-baseline timer when duration changes (parity with upstream useEffect([duration]))
+        if (t.duration !== undefined && t.duration !== old.duration) {
+          const s = this.perToast.get(t.id);
+          if (s) {
+            s.remainingTime = t.duration;
+            s.closeTimerStart = 0;
+            s.lastCloseTimerStart = 0;
+          }
+        }
+        this.toasts[idx] = { ...old, ...t };
         this.updateToastContent(this.toasts[idx]);
         this.updateTimer(this.toasts[idx]);
       } else {
@@ -880,9 +938,8 @@ export class SonnerToaster {
 
   private setExpanded(next: boolean) {
     if (next === this.expanded) return;
-    // Avoid expand with <=1 toast
-    if (next && this.toasts.length <= 1) return;
     this.expanded = next;
+    this.lists.forEach((ol) => ol.setAttribute('data-lifted', String(next)));
     this.applyExpandedToToasts();
     this.toasts.forEach((t) => this.updateTimer(t));
   }

@@ -4,26 +4,47 @@ import type { ToasterProps } from '../src/types';
 export interface Props extends ToasterProps {}
 
 const props = Astro.props as Props;
+
+// Warn server-side when props contain values that won't survive JSON serialization.
+// Functions, HTMLElements, and similar non-primitive values are silently dropped by
+// JSON.stringify. Use createToaster() directly in a <script> for those props.
+const NON_SERIALIZABLE_KEYS = ['icons', 'customAriaLabel', 'style'];
+for (const key of NON_SERIALIZABLE_KEYS) {
+  const val = (props as any)[key];
+  if (val !== undefined && typeof val === 'function') {
+    console.warn(`[sonner-astro] Prop "${key}" is a function and will be dropped. Use createToaster() in a <script> for this prop.`);
+  }
+}
+
 const serialized = JSON.stringify(props ?? {});
 ---
 
-<section data-sonner-root></section>
-
-<script is:inline define:vars={{ serialized }}>
-  // Ensure single boot
-  if (!window.__sonnerAstroBooted) {
-    window.__sonnerAstroBooted = true;
-    window.__sonnerAstroProps = JSON.parse(serialized);
-  }
-</script>
+<section data-sonner-root data-sonner-props={serialized}></section>
 
 <script>
   import { createToaster } from '../src/index';
   import '../src/styles.css';
 
-  const root = document.querySelector('section[data-sonner-root]') as HTMLElement | null;
-  if (root && !(root as any).__sonnerInstance) {
-    const props = (window as any).__sonnerAstroProps || {};
-    (root as any).__sonnerInstance = createToaster(root, props);
+  function bootToasters() {
+    const roots = document.querySelectorAll<HTMLElement>('section[data-sonner-root]:not([data-sonner-booted])');
+    roots.forEach((root) => {
+      let props = {};
+      try { props = JSON.parse(root.dataset.sonnerProps || '{}'); } catch {}
+      root.setAttribute('data-sonner-booted', 'true');
+      (root as any).__sonnerInstance = createToaster(root, props);
+    });
   }
+
+  bootToasters();
+
+  // Astro View Transitions support
+  document.addEventListener('astro:before-swap', () => {
+    document.querySelectorAll<HTMLElement>('section[data-sonner-root]').forEach((root) => {
+      (root as any).__sonnerInstance?.destroy();
+    });
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    bootToasters();
+  });
 </script>

@@ -83,9 +83,9 @@ class Observer {
   dismiss = (id?: number | string) => {
     if (id) {
       this.dismissedToasts.add(id);
-      requestAnimationFrame(() =>
+      setTimeout(() =>
         this.subscribers.forEach((subscriber) => subscriber({ id, dismiss: true })),
-      );
+      0);
     } else {
       this.toasts.forEach((toast) => {
         this.subscribers.forEach((subscriber) => subscriber({ id: toast.id, dismiss: true }));
