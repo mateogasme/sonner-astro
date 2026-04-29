@@ -49,13 +49,10 @@ import Title from '../components/Title.astro';
     }
   }
 
-  function applyToasterTheme(resolved: 'light' | 'dark') {
+  function applyToasterTheme(theme: string) {
     const root = document.querySelector<any>('section[data-sonner-root]');
     const inst = root?.__sonnerInstance as any;
-    if (!inst) return;
-    inst.opts.theme = resolved;
-    inst.actualTheme = resolved;
-    inst.lists?.forEach((ol: HTMLElement) => ol.setAttribute('data-sonner-theme', resolved));
+    inst?.setTheme?.(theme as 'light' | 'dark' | 'system');
   }
 
   function syncButtons() {
@@ -69,7 +66,7 @@ import Title from '../components/Title.astro';
     const resolvedSaved = resolveTheme(saved);
     applyPageTheme(resolvedSaved);
     preview?.setCode?.(CODE[saved]);
-    requestAnimationFrame(() => applyToasterTheme(resolvedSaved));
+    requestAnimationFrame(() => applyToasterTheme(saved));
   }
   syncButtons();
 
@@ -85,7 +82,7 @@ import Title from '../components/Title.astro';
 
       // 2. Apply theme — every element transitions together at DURATION ms
       applyPageTheme(resolved);
-      applyToasterTheme(resolved);
+      applyToasterTheme(currentTheme);
       syncButtons();
 
       // 3. After transition completes, restore normal per-element transitions

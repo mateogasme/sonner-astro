@@ -6,7 +6,7 @@ const flags: Record<PreviewFlag, boolean> = {
 };
 
 let colorMode: ColorMode = 'off';
-let currentDuration: number = 5000;
+let currentDuration: number = 4000;
 let currentPosition: string = 'bottom-right';
 
 export function getColorMode(): ColorMode {

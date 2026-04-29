@@ -7,15 +7,15 @@ import Title from '../components/Title.astro';
 
 <section class="mt-14">
   <Title>Duration</Title>
-  <P>Control how long toasts stay visible before auto-dismissing. The default duration is 5s.</P>
+  <P>Control how long toasts stay visible before auto-dismissing. The default duration is 4s.</P>
   <div class="mt-4 flex flex-wrap gap-2">
     <ButtonOption data-dur="3000">3s</ButtonOption>
-    <ButtonOption data-dur="5000">5s</ButtonOption>
+    <ButtonOption data-dur="4000">4s</ButtonOption>
     <ButtonOption data-dur="10000">10s</ButtonOption>
     <ButtonOption data-dur="Infinity">∞</ButtonOption>
   </div>
   <div class="mt-4">
-    <CodeBlock code={`<Toaster duration={5000} />`} data-duration-preview />
+    <CodeBlock code={`<Toaster duration={4000} />`} data-duration-preview />
   </div>
 </section>
 
@@ -31,8 +31,8 @@ import Title from '../components/Title.astro';
   }
 
   function updatePreview(val: string) {
-    if (val === '5000') {
-      preview?.setCode?.(`<Toaster duration={5000} /> // default`);
+    if (val === '4000') {
+      preview?.setCode?.(`<Toaster duration={4000} /> // default`);
     } else {
       preview?.setCode?.(`<Toaster duration={${val}} />`);
     }
