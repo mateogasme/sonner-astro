@@ -22,8 +22,12 @@ const serialized = JSON.stringify(props ?? {});
 <section data-sonner-root data-sonner-props={serialized}></section>
 
 <script>
-  import { createToaster } from '../src/index';
-  import '../src/styles.css';
+  // Import via package self-reference so the consumer's bundler resolves to the
+  // same dist module that `import { toast } from 'sonner-astro'` resolves to —
+  // otherwise the Toaster subscribes to a different ToastState instance than
+  // the one consumer toasts write to, and nothing renders.
+  import { createToaster } from 'sonner-astro';
+  import 'sonner-astro/styles.css';
 
   function bootToasters() {
     const roots = document.querySelectorAll<HTMLElement>('section[data-sonner-root]:not([data-sonner-booted])');
@@ -41,6 +45,8 @@ const serialized = JSON.stringify(props ?? {});
   document.addEventListener('astro:before-swap', () => {
     document.querySelectorAll<HTMLElement>('section[data-sonner-root]').forEach((root) => {
       (root as any).__sonnerInstance?.destroy();
+      delete (root as any).__sonnerInstance;
+      root.removeAttribute('data-sonner-booted');
     });
   });
 

@@ -64,13 +64,19 @@ html[data-theme="dark"] {
 /* ─── Base ─────────────────────────────────────────────────────────────── */
 html,
 body {
-  scroll-behavior: smooth;
   scrollbar-gutter: stable;
   background: var(--bg);
   color: var(--fg);
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html,
+  body {
+    scroll-behavior: smooth;
+  }
 }
 
 h1,

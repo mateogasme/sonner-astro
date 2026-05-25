@@ -70,7 +70,7 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
     border-radius: 0;
     line-height: 17px;
     white-space: pre-wrap;
-    word-break: break-all;
+    overflow-wrap: anywhere;
   }
 
   .cb-root code {
@@ -121,6 +121,12 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
 
     .cb-copy:hover {
       background: var(--gray1);
+    }
+  }
+
+  @media (hover: none) {
+    .cb-copy {
+      opacity: 1;
     }
   }
 
@@ -231,7 +237,8 @@ const { code, label, alwaysShowCopy = false } = Astro.props;
         ta.style.cssText = 'position:fixed;opacity:0';
         document.body.appendChild(ta);
         ta.select();
-        document.execCommand('copy');
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
+        (document as any).execCommand('copy');
         ta.remove();
       }
 

@@ -114,7 +114,7 @@ import CodeBlock from '../components/CodeBlock.astro';
     const subscribe = () => new Promise<void>((resolve) => setTimeout(resolve, 1500));
     toast.promise(subscribe(), {
       loading: 'Sending...',
-      success: "Your message was sended!",
+      success: "Your message was sent!",
       error: 'Something went wrong.',
       ...getToastOpts(),
     });

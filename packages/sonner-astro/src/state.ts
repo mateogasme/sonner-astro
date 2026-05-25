@@ -26,7 +26,9 @@ class Observer {
     this.subscribers.push(subscriber);
     return () => {
       const index = this.subscribers.indexOf(subscriber);
-      this.subscribers.splice(index, 1);
+      if (index !== -1) {
+        this.subscribers.splice(index, 1);
+      }
     };
   };
 
@@ -81,7 +83,7 @@ class Observer {
   };
 
   dismiss = (id?: number | string) => {
-    if (id) {
+    if (id !== undefined && id !== null) {
       this.dismissedToasts.add(id);
       setTimeout(() =>
         this.subscribers.forEach((subscriber) => subscriber({ id, dismiss: true })),
@@ -195,7 +197,7 @@ class Observer {
   };
 
   custom = (jsx: (id: number | string) => HTMLElement, data?: ExternalToast) => {
-    const id = data?.id || toastsCounter++;
+    const id = data?.id ?? toastsCounter++;
     this.create({ jsx, ...data, id });
     return id;
   };
@@ -208,7 +210,7 @@ class Observer {
 export const ToastState = new Observer();
 
 const toastFunction = (message: TitleT, data?: ExternalToast) => {
-  const id = data?.id || toastsCounter++;
+  const id = data?.id ?? toastsCounter++;
   ToastState.addToast({ title: message, ...data, id } as ToastT);
   return id;
 };

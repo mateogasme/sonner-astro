@@ -1,6 +1,6 @@
 {
   "name": "sonner-astro",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An opinionated toast component for Astro.",
   "type": "module",
   "license": "MIT",
@@ -19,13 +19,23 @@
   "bugs": {
     "url": "https://github.com/mateogasme/sonner-astro/issues"
   },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./Toaster.astro": "./components/Toaster.astro",
     "./styles.css": "./src/styles.css"
   },
   "files": [
     "components",
+    "dist",
     "src",
     "README.md",
     "LICENSE"
@@ -34,11 +44,15 @@
     "astro": "^6.0.0"
   },
   "scripts": {
-    "check": "astro check"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "check": "astro check",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
     "astro": "^6.1.8",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }

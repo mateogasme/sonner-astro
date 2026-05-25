@@ -122,7 +122,7 @@ export interface ToastToDismiss {
   dismiss: boolean;
 }
 
-export type ExternalToast = Omit<ToastT, 'id' | 'type' | 'title' | 'jsx' | 'delete' | 'promise'> & {
+export type ExternalToast = Omit<ToastT, 'id' | 'title' | 'jsx' | 'delete' | 'promise'> & {
   id?: number | string;
   toasterId?: string;
 };
@@ -173,6 +173,8 @@ export interface ToasterProps {
   dir?: 'rtl' | 'ltr' | 'auto';
   swipeDirections?: SwipeDirection[];
   icons?: ToastIcons;
+  loadingIcon?: string | HTMLElement;
+  container?: HTMLElement | ShadowRoot;
   customAriaLabel?: string;
   containerAriaLabel?: string;
 }

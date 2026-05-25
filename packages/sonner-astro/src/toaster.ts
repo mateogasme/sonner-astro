@@ -188,12 +188,23 @@ export class SonnerToaster {
     this.keyHandler = (event) => {
       const hk = this.opts.hotkey || [];
       const pressed = hk.length > 0 && hk.every((key) => (event as any)[key] || event.code === key);
-      if (pressed) {
-        this.setExpanded(true);
-        const firstList = this.lists.values().next().value;
-        firstList?.focus();
-      }
       const firstList = this.lists.values().next().value;
+      if (pressed) {
+        // If multiple Toaster instances are mounted, only the first to capture
+        // the hotkey responds — avoids N focus() calls fighting each other.
+        if (!document.querySelector('[data-sonner-toaster][data-sonner-hotkey-focused="true"]')) {
+          this.setExpanded(true);
+          if (firstList) {
+            firstList.setAttribute('data-sonner-hotkey-focused', 'true');
+            firstList.focus();
+            const clear = () => {
+              firstList.removeAttribute('data-sonner-hotkey-focused');
+              firstList.removeEventListener('blur', clear);
+            };
+            firstList.addEventListener('blur', clear);
+          }
+        }
+      }
       if (
         event.code === 'Escape' &&
         firstList &&
@@ -392,7 +403,7 @@ export class SonnerToaster {
       }
     });
 
-    this.rootEl.appendChild(ol);
+    (this.opts.container ?? this.rootEl).appendChild(ol);
     this.lists.set(position, ol);
     return ol;
   }
@@ -607,12 +618,13 @@ export class SonnerToaster {
         if (toast.icon) {
           if (toast.icon instanceof HTMLElement) iconDiv.appendChild(toast.icon.cloneNode(true));
           else iconDiv.innerHTML = String(toast.icon);
-        } else if (icons?.loading) {
+        } else if (icons?.loading || this.opts.loadingIcon) {
+          const loadingNode = icons?.loading ?? this.opts.loadingIcon!;
           const wrap = document.createElement('div');
           wrap.className = cn(classNames?.loader, toast.classNames?.loader, 'sonner-loader');
           wrap.setAttribute('data-visible', String(toastType === 'loading'));
-          if (icons.loading instanceof HTMLElement) wrap.appendChild(icons.loading.cloneNode(true));
-          else wrap.innerHTML = String(icons.loading);
+          if (loadingNode instanceof HTMLElement) wrap.appendChild(loadingNode.cloneNode(true));
+          else wrap.innerHTML = String(loadingNode);
           iconDiv.appendChild(wrap);
         } else {
           iconDiv.insertAdjacentHTML(

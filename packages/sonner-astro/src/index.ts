@@ -14,4 +14,3 @@ export type {
   ToastOptions,
   Offset,
 } from './types';
-import './styles.css';
